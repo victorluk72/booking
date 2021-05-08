@@ -25,9 +25,15 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Use(SessionLoad)
 	//--------Middleware block End------------
 
-	//These are my routes
+	//------These are my routes---------------
 	mux.Get("/", handlers.Ripo.Home)
 	mux.Get("/about", handlers.Ripo.About)
+	mux.Get("/make-reservation", handlers.Ripo.Reservation)
+	mux.Get("/search-availability", handlers.Ripo.Availability)
+	mux.Get("/generals", handlers.Ripo.Generals)
+	mux.Get("/majors", handlers.Ripo.Majors)
+	mux.Get("/contact", handlers.Ripo.Contact)
+	//------End of my routes block---------------
 
 	//Create file server to manage our static files
 	fileServer := http.FileServer(http.Dir("../../static/"))
