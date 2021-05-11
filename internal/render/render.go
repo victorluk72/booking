@@ -8,8 +8,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/victorluk72/booking/pkg/config"
-	"github.com/victorluk72/booking/pkg/models"
+	"github.com/justinas/nosurf"
+	"github.com/victorluk72/booking/internal/config"
+	"github.com/victorluk72/booking/internal/models"
 )
 
 // Define var "functions". We will use it to allow our own functions in tempalte
@@ -25,15 +26,21 @@ func NewTemplates(a *config.AppConfig) {
 }
 
 // AddDefaultData is to provide default tempalte data to tempaltes
-// it takes TemplateData struc as input argument and return the same struct (but with data)
+// it takes TemplateData struct as input argument and return the same struct (but with data)
 // This is for data that requred in every page, so we don't need to build it on each handler
-func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
+
+	//Add CSRF token to all tempalte data
+	//Token takes an HTTP request and returns
+	//the CSRF token for that request or an empty string if not exist.
+	td.CSRFToken = nosurf.Token(r)
+
 	return td
 }
 
 // RenderTemplate rendes the template and pass it to http.Response writes
 // it accepts three arguments: http.ResponseWriter, name of tempalte (templ string) and td (data for template)
-func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
 
 	//If you in production mode don't use template cache, rebuild it with every request
 	var tc map[string]*template.Template
@@ -61,8 +68,8 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData)
 	//Create a bytes buffer to hold the template
 	buf := new(bytes.Buffer)
 
-	//Thissi to add defauld set of data
-	td = AddDefaultData(td)
+	//This is to add defauld set of data to tempalte data
+	td = AddDefaultData(td, r)
 
 	//Execute template from buffer, pass td (tempalte data)
 	_ = t.Execute(buf, td)

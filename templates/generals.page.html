@@ -30,13 +30,10 @@
         </div>
     </div>
 
-
     <div class="row">
 
         <div class="col text-center">
-
             <a id="check-availability-button" href="#!" class="btn btn-success">Check Availability</a>
-
         </div>
     </div>
    
@@ -65,7 +62,57 @@ document.getElementById("check-availability-button").addEventListener("click", f
                     </div> 
                 </form>
              `
-             attention.custom({msg: html, title:"Chose your dates"}) 
+             attention.custom({
+                 msg: html, 
+                 title:"Chose your dates",
+
+                 //--This will -----------------------
+                 willOpen: () => {
+                                
+                        //Date picker logic
+                        const elem = document.getElementById('reservation-dates-modal');
+                        const rangepicker = new DateRangePicker(elem, {
+                        // ...options
+                        format:"yyyy-mm-dd",
+                        showOnFocus: true,
+                        });                            
+                      }, 
+
+                didOpen: () => {
+                        document.getElementById('start').removeAttribute("disabled")
+                        document.getElementById('end').removeAttribute("disabled")
+                        },
+
+                 //-------------------------------------
+
+                 callback: function(result){
+                     console.log("called from callback");
+
+                     //---Get the data from form and store them in variables
+                     //Thisis reference to my form (by id)
+                     let form = document.getElementById("check-availability-form");
+                     
+                     //This will have all elements from form 
+                     let formData = new FormData(form)
+                     
+                     //Append CSRF token code to my form 
+                     formData.append("csrf_token", "{{.CSRFToken}}");
+
+                     // Perform AJAX request 
+                     // First go to route (it is a Post route)
+                     // turn responce to json
+                     fetch('/search-availability-json', {
+                         method: "post",
+                         body:formData,
+                     })
+                          .then(response => response.json())
+                          .then(data => {
+                              console.log(data);
+                              console.log(data.ok);
+                              console.log(data.message);
+                          })
+                 }
+                });
          })      
 </script>
 

@@ -45,12 +45,16 @@
                 <a class="nav-link" href="/make-reservation">Book Now</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="/search-availability">Search Avaialibility</a>
+            </li> 
+            <li class="nav-item">
                 <a class="nav-link" href="/contact">Contact</a>
-            </li>    
+            </li>  
             </ul>
         </div>
     </nav>
     <!-- End of Navbar block -->
+
     {{block "content" .}}
 
     {{end}}
@@ -187,24 +191,18 @@
                 const {
                     msg ="",
                     title ="",
-
                 }=c;
 
-            const { value: formValues } = await Swal.fire({
+            const { value: result } = await Swal.fire({
                       title: title,
                       html:msg,
                       backdrop: false,
                       focusConfirm: false,
                       showCancelButton: true,
                       willOpen: () => {
-                                
-                                //Date picker logic
-                                const elem = document.getElementById('reservation-dates-modal');
-                                const rangepicker = new DateRangePicker(elem, {
-                                // ...options
-                                format:"yyyy-mm-dd",
-                                showOnFocus: true,
-                                });                            
+                          if (c.willOpen !== undefined){
+                              c.willOpen();
+                          }                                   
                       },
                       preConfirm: () => {
                         return [
@@ -214,17 +212,38 @@
                       },
 
                       didOpen: () => {
-
-                          document.getElementById('start').removeAttribute("disabled")
-                          document.getElementById('end').removeAttribute("disabled")
+                        if (c.didOpen !== undefined){
+                              c.didOpen();
+                          }
                         }
                     })
 
-                    if (formValues) {
-                      Swal.fire(JSON.stringify(formValues))
-                    }  
+                    //----This block is to handle result of date pick (asyncronically)
+                    //Check if you have any result and handle the result
+                    if (result){
 
+                        //Check if user didin't click "Cancel" button
+                        if (result.dismiss !== Swal.DismissReason.cancel){
+
+                            //Check if value of result is not empty
+                            if (result.value !==""){
+                                
+                                if (c.callback !== undefined){
+                                    //pass result asyncronically 
+                                    c.callback(result);
+                                }
+                            }else{
+                                c.callback(false);
+                            }
+
+                        //This else if result is "Cancel"
+                        }else{
+                            c.callback(false);
+                        }
+                    }
+                    //----End of the block that handles result of date pick (asyncronically)
                 }
+                
 
            return {
             success: success,
