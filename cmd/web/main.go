@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,12 +10,13 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/victorluk72/booking/internal/config"
 	"github.com/victorluk72/booking/internal/handlers"
+	"github.com/victorluk72/booking/internal/models"
 	"github.com/victorluk72/booking/internal/render"
 )
 
 const portNumber = ":8080"
 
-//Varuiable that controls the session
+//Varuiable that controls the session (from package scs)
 var session *scs.SessionManager
 
 // Get all configuration values (from package "config")
@@ -22,6 +24,11 @@ var session *scs.SessionManager
 var app config.AppConfig
 
 func main() {
+
+	// What I'm going to put into my session? - I'm passing Reservation model
+	// You need this to pass the content of the reservation form to page reservation-summary
+	// See handlers.go m.App.Session.Put(r.Context(), "reservation-details", reservation)
+	gob.Register(models.Reservation{})
 
 	//Change these to "true" when in Production
 	app.InProduction = false
@@ -33,7 +40,7 @@ func main() {
 	session.Cookie.SameSite = http.SameSiteLaxMode //WTF?
 	session.Cookie.Secure = app.InProduction       //This is haandling https. Set true for Prod
 
-	// Now asing what ever you have for session in main to app.Config variable
+	// Now asign whatever you have for session in main to app.Config variable
 	app.Session = session
 
 	//----Session managment Ends------------------

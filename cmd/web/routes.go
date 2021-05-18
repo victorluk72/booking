@@ -25,7 +25,7 @@ func routes(app *config.AppConfig) http.Handler {
 
 	// This is middleware for session load
 	mux.Use(SessionLoad)
-	//--------Middleware block End------------
+	//--------Middleware block Ends------------
 
 	//------These are my routes---------------
 	mux.Get("/", handlers.Ripo.Home)
@@ -39,6 +39,9 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Post("/search-availability-json", handlers.Ripo.AvailabilityJSON)
 
 	mux.Get("/make-reservation", handlers.Ripo.Reservation)
+	mux.Post("/make-reservation", handlers.Ripo.PostReservation)
+	mux.Get("/reservation-summary", handlers.Ripo.ReservationSummary)
+
 	//------End of my routes block---------------
 
 	//Create file server to manage our static files

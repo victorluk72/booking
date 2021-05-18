@@ -133,6 +133,27 @@
                 })
         }
 
+        //This is for displaying error on every page I need
+        //Get Error from my Data
+        {{with .Error}}
+        notify("{{.}}", "error")
+        {{end}}
+
+        //Get Flash from my Data
+        {{with .Flash}}
+        notify("{{.}}", "success")
+        {{end}}
+
+        //Get Warning from my Data
+        {{with .Warning}}
+        notify("{{.}}", "warning")
+        {{end}}        
+
+
+
+
+
+
         function Prompt(){
 
             let success = function(c){

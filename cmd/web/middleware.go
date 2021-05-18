@@ -9,7 +9,6 @@ import (
 
 // WriteToConcole is a "middleware" type of function that
 // will write something to console when page is hit
-
 func WriteToConcole(next http.Handler) http.Handler {
 
 	//Return anonimouse function, cast it to type "http.HandlerFunc"
@@ -17,7 +16,6 @@ func WriteToConcole(next http.Handler) http.Handler {
 		fmt.Println("Hit the page")
 		next.ServeHTTP(w, r)
 	})
-
 }
 
 // NoSurf generates CSRF protection to all POST request

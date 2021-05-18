@@ -35,6 +35,13 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 	//the CSRF token for that request or an empty string if not exist.
 	td.CSRFToken = nosurf.Token(r)
 
+	// Add flash/warning/error messages (pass through session)
+	// They wil be autopopulated every time when I'm rendering pages
+	// PopString put something in the session until next time page displied
+	td.Flash = app.Session.PopString(r.Context(), "flash-msg")
+	td.Error = app.Session.PopString(r.Context(), "error-msg")
+	td.Warning = app.Session.PopString(r.Context(), "warning-msg")
+
 	return td
 }
 
