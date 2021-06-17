@@ -2,6 +2,7 @@ package render
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,8 +21,12 @@ var functions = template.FuncMap{}
 // This variable is a pointer to my site-wide config package
 var app *config.AppConfig
 
-// NewTemplates sets the config for tempalte package
-func NewTemplates(a *config.AppConfig) {
+// This is variable to store patch to templates
+// It can be differewnt for Linux
+var pathToTemplates = "../../templates"
+
+// NewRenderer sets the config for tempalte package
+func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
@@ -45,9 +50,9 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 	return td
 }
 
-// RenderTemplate rendes the template and pass it to http.Response writes
-// it accepts three arguments: http.ResponseWriter, name of tempalte (templ string) and td (data for template)
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) {
+// RenderTemplate renders the template and pass it to http.Response writer
+// it accepts 4 arguments: http.ResponseWriter, http Request, name of tempalte (templ string) and td (data for template)
+func Template(w http.ResponseWriter, r *http.Request, tmpl string, td *models.TemplateData) error {
 
 	//If you in production mode don't use template cache, rebuild it with every request
 	var tc map[string]*template.Template
@@ -59,17 +64,19 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 		tc = app.TemplateCache
 
 	} else {
-		// This will ignote tempalte cache and rebuld tempalte cache from disc every time
+		// This will ignore tempalte cache and rebuld tempalte cache from disc every time
 		// This is for development mode
 		tc, _ = CreateTemplateCache()
 
 	}
 
-	//Pull individual tempalte from my cache of tempalte
+	//Pull individual template from my cache of tempaltes
 	//if exist run it, otherwise error
 	t, ok := tc[tmpl]
+	fmt.Println("THIS IS MY TEMPLATE:", t)
 	if !ok {
 		log.Fatal("Couldn't get template from tempalte cache")
+		return errors.New("Can't get template from cache")
 	}
 
 	//Create a bytes buffer to hold the template
@@ -85,7 +92,10 @@ func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, td *mod
 	_, err := buf.WriteTo(w)
 	if err != nil {
 		fmt.Println("Error writing template to browser")
+		return err
 	}
+
+	return nil
 
 }
 
@@ -100,7 +110,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	//This give you list of all full path to files that have "page.html" in the file name
-	pages, err := filepath.Glob("../../templates/*.page.html")
+	pages, err := filepath.Glob(fmt.Sprintf("%s/*.page.html", pathToTemplates))
 	if err != nil {
 		return myCache, err
 	}
@@ -116,13 +126,13 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 		}
 
 		//Check for base.layout.html files in templates folder
-		matches, err := filepath.Glob("../../templates/*.layout.html")
+		matches, err := filepath.Glob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 		if err != nil {
 			return myCache, err
 		}
 
 		if len(matches) > 0 {
-			ts, err = ts.ParseGlob("../../templates/*.layout.html")
+			ts, err = ts.ParseGlob(fmt.Sprintf("%s/*.layout.html", pathToTemplates))
 			if err != nil {
 				return myCache, err
 			}

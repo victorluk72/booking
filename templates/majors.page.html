@@ -61,7 +61,77 @@ document.getElementById("check-availability-button").addEventListener("click", f
                     </div> 
                 </form>
              `
-             attention.custom({msg: html, title:"Chose your dates"}) 
+             attention.custom({
+                 msg: html, 
+                 title:"Chose your dates",
+
+                 //--This will -----------------------
+                 willOpen: () => {
+                                
+                        //Date picker logic
+                        const elem = document.getElementById('reservation-dates-modal');
+                        const rangepicker = new DateRangePicker(elem, {
+                        // ...options
+                        format:"yyyy-mm-dd",
+                        showOnFocus: true,
+                        minDate: new Date(), //prevent from choosing date from the past
+                        });                            
+                      }, 
+
+                didOpen: () => {
+                        document.getElementById('start').removeAttribute("disabled")
+                        document.getElementById('end').removeAttribute("disabled")
+                        },
+
+                 //-------------------------------------
+
+                 callback: function(result){
+                     console.log("called from callback");
+
+                     //---Get the data from form and store them in variables
+                     //Thisis reference to my form (by id)
+                     let form = document.getElementById("check-availability-form");
+                     
+                     //This will have all elements from form 
+                     let formData = new FormData(form)
+                     
+                     //Append CSRF token code and room ID to my form 
+                     formData.append("csrf_token", "{{.CSRFToken}}");
+                     formData.append("room_id", "2")
+
+                     // Perform AJAX request 
+                     // First go to route (it is a Post route)
+                     // turn response to json
+                     fetch('/search-availability-json', {
+                         method: "post",
+                         body:formData,
+                     })
+                          .then(response => response.json())
+                          .then(data => {
+                              if (data.ok){
+                                  attention.custom({
+                                      icon: 'success',
+                                      showConfirmButton:false,
+                                      msg:   '<p>Room is avaialble</p>'
+                                             + '<p><a href="/book-room?id='
+                                             + data.room_id
+                                             + '&sd='
+                                             + data.start_date
+                                             + '&ed='
+                                             + data.end_date
+                                             +'" class="btn btn-primary">'
+                                             + 'Book now!</a></p>',
+
+                                  })
+                              }else{
+                                attention.error({
+                                    msg: "No avaialbility for these dates",
+                                })
+                              }
+
+                          })
+                 }
+                });
          })      
 </script>
 

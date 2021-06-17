@@ -33,10 +33,13 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/generals", handlers.Ripo.Generals)
 	mux.Get("/majors", handlers.Ripo.Majors)
 	mux.Get("/contact", handlers.Ripo.Contact)
+	mux.Get("/user/login", handlers.Ripo.Login)
 
 	mux.Get("/search-availability", handlers.Ripo.Availability)
 	mux.Post("/search-availability", handlers.Ripo.PostAvailability)
 	mux.Post("/search-availability-json", handlers.Ripo.AvailabilityJSON)
+	mux.Get("/choose-room/{id}", handlers.Ripo.ChooseRoom)
+	mux.Get("/book-room", handlers.Ripo.BookRoom)
 
 	mux.Get("/make-reservation", handlers.Ripo.Reservation)
 	mux.Post("/make-reservation", handlers.Ripo.PostReservation)

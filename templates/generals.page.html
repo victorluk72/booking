@@ -75,6 +75,7 @@ document.getElementById("check-availability-button").addEventListener("click", f
                         // ...options
                         format:"yyyy-mm-dd",
                         showOnFocus: true,
+                        minDate: new Date(), //prevent from choosing date from the past
                         });                            
                       }, 
 
@@ -95,21 +96,40 @@ document.getElementById("check-availability-button").addEventListener("click", f
                      //This will have all elements from form 
                      let formData = new FormData(form)
                      
-                     //Append CSRF token code to my form 
+                     //Append CSRF token code and room ID to my form 
                      formData.append("csrf_token", "{{.CSRFToken}}");
+                     formData.append("room_id", "1")
 
                      // Perform AJAX request 
                      // First go to route (it is a Post route)
-                     // turn responce to json
+                     // turn response to json
                      fetch('/search-availability-json', {
                          method: "post",
                          body:formData,
                      })
                           .then(response => response.json())
                           .then(data => {
-                              console.log(data);
-                              console.log(data.ok);
-                              console.log(data.message);
+                              if (data.ok){
+                                  attention.custom({
+                                      icon: 'success',
+                                      showConfirmButton:false,
+                                      msg:   '<p>Room is avaialble</p>'
+                                             + '<p><a href="/book-room?id='
+                                             + data.room_id
+                                             + '&sd='
+                                             + data.start_date
+                                             + '&ed='
+                                             + data.end_date
+                                             +'" class="btn btn-primary">'
+                                             + 'Book now!</a></p>',
+
+                                  })
+                              }else{
+                                attention.error({
+                                    msg: "No avaialbility for these dates",
+                                })
+                              }
+
                           })
                  }
                 });

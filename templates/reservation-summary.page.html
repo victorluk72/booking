@@ -2,12 +2,14 @@
 
 {{define "content"}}
  <!-- Get data from variable "reservation" -->
+ <!-- It will give you content of the model" -->
+ <!-- For the dates in proper fomat use StringMap -->
  {{$res := index .Data "i-reservation"}}
 
     <div class="container">
         <div class="row">
-            <div class="col">
-                <h1 class="mt-5">Reservation summary</h1>
+            <div class="col"> 
+                <h1 class="mt-5">Reservation summary for {{$res.Room.RoomName}} room</h1>
                 
                 <hr>
                 <table class="table table-striped">
@@ -20,11 +22,11 @@
                         </tr>
                         <tr>
                             <td>Arrival:</td>
-                            <td></td>
+                            <td>{{index .StringMap "start_date"}}</td>
                         </tr>
                         <tr>
                             <td>Departure:</td>
-                            <td></td>
+                            <td>{{index .StringMap "end_date"}}</td>
                         </tr>
                         <tr>
                             <td>Email</td>
