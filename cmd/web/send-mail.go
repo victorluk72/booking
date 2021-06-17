@@ -31,8 +31,8 @@ func sendMsg(m models.MailData) {
 	server := mail.NewSMTPClient()
 	server.Host = "smtp.mailtrap.io"
 	server.Port = 2525
-	server.Username = "209f2634471d77"
-	server.Password = "7515969fa1abd7"
+	server.Username = ""
+	server.Password = ""
 	server.KeepAlive = false
 	server.ConnectTimeout = 10 + time.Second
 	server.SendTimeout = 10 + time.Second
