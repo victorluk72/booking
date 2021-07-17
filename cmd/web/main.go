@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -73,6 +74,27 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+	gob.Register(map[string]int{})
+
+	// Read flags from CLI (replace hardcoded values)
+	//First flag for "production - true or false"
+	InProduction := flag.Bool("production", true, "Application is in Production")
+	useCache := flag.Bool("cache", true, "Use cache for templates")
+	dbHost := flag.String("dbhost", "localhost", "Database host")
+	dbName := flag.String("dbname", "", "Database name")
+	dbUser := flag.String("dbuser", "", "Database user")
+	dbPass := flag.String("dbpass", "", "Database password")
+	dbPort := flag.Int("dbport", 5432, "Database port")
+	dbSSL := flag.String("dbssl", "disable", "Database SSL (disable, prefer, require")
+
+	flag.Parse()
+
+	//Check if all mandatory parameters are provided
+	if *dbName == "" || *dbUser == "" || *dbPass == "" {
+		fmt.Println("Missing mandatory flags")
+		os.Exit(1)
+
+	}
 
 	//Create new channel for my mail chaneel
 	mailChan := make(chan models.MailData)
@@ -81,7 +103,10 @@ func run() (*driver.DB, error) {
 	app.MailChan = mailChan
 
 	//Change these to "true" when in Production
-	app.InProduction = false
+	app.InProduction = *InProduction
+	// Don't use template cache (for example during dev process)
+	// false for Dev, true for Prod
+	app.UseCache = *useCache
 
 	//Define new INFO and ERROR logger and make it avaialble for whole application (vial app.Infolog)
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -104,8 +129,7 @@ func run() (*driver.DB, error) {
 	//Initialize my database connection
 	log.Println("Connecting to database...")
 
-	//Hardcoded for testing/change for production
-	dsn := "host=localhost port=5432 dbname=bookings user=postgres password=viktor321q"
+	dsn := fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s sslmode=%s", *dbHost, *dbPort, *dbName, *dbUser, *dbPass, *dbSSL)
 
 	db, err := driver.ConnectSQL(dsn)
 	if err != nil {
@@ -125,10 +149,6 @@ func run() (*driver.DB, error) {
 	// Assign my tempalte cache to configuration variable app.TemplateCache
 	// This allows get cache once and do not reach it every time we browse
 	app.TemplateCache = tc
-
-	// Don't use template cache (for example during dev process)
-	// false for Dev, true for Prod
-	app.UseCache = false
 
 	//--TEMP:Print list of all pages from tempalte cache
 	fmt.Println("---This is my template cache:---")

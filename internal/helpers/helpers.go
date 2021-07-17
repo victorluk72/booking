@@ -43,3 +43,10 @@ func ServerError(w http.ResponseWriter, err error) {
 	http.Error(w, http.StatusText(ise), ise)
 
 }
+
+func IsAuthenticated(r *http.Request) bool {
+
+	//Check if current containes key "user_id"
+	exists := app.Session.Exists(r.Context(), "user_id")
+	return exists
+}

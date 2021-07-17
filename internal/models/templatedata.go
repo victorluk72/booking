@@ -16,4 +16,5 @@ type TemplateData struct {
 	Warning   string                 // string for warning message
 	Error     string                 // string for error message
 	Form      *forms.Form            // form type from standard library
+	IsAuth    bool                   // Check if user is authenticated
 }

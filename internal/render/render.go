@@ -8,15 +8,22 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	"github.com/justinas/nosurf"
 	"github.com/victorluk72/booking/internal/config"
 	"github.com/victorluk72/booking/internal/models"
 )
 
-// Define var "functions". We will use it to allow our own functions in tempalte
-// These will be a custom functions for tempaltes (in future)
-var functions = template.FuncMap{}
+// Define var "functions". We will use it to allow our custom functions in templates
+// These will be custom functions for tempaltes (in future)
+// You can define your functions in this module and pass it to templates
+var functions = template.FuncMap{
+	"humanDate":  HumaneDate,
+	"formatDate": FormatDate,
+	"iterate":    Iterate,
+	"addInt":     AddInt,
+}
 
 // This variable is a pointer to my site-wide config package
 var app *config.AppConfig
@@ -28,6 +35,38 @@ var pathToTemplates = "../../templates"
 // NewRenderer sets the config for tempalte package
 func NewRenderer(a *config.AppConfig) {
 	app = a
+}
+
+// HumaneDate formats date to readable format and pass to template as a string
+// Make this function available to template by putting it to var functions
+func HumaneDate(t time.Time) string {
+	return t.Format("2006-01-02")
+}
+
+// FormatDate formats any date to specified format (also passed as function argument)
+// Make this function available to template by putting it to var functions
+func FormatDate(t time.Time, f string) string {
+	return t.Format(f)
+}
+
+// Iterate will make possible to use "for" loops in tempalte
+// It takes "count" as parametes and returm slice of ints, startign from 1 to "count"
+// Make this function available to template by putting it to var functions
+func Iterate(count int) []int {
+
+	var i int
+	var items []int
+
+	for i = 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
+// Make this function available to template by putting it to var functions
+func AddInt(a, b int) int {
+
+	return a + b
 }
 
 // AddDefaultData is to provide default tempalte data to tempaltes
@@ -46,6 +85,13 @@ func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateDa
 	td.Flash = app.Session.PopString(r.Context(), "flash-msg")
 	td.Error = app.Session.PopString(r.Context(), "error-msg")
 	td.Warning = app.Session.PopString(r.Context(), "warning-msg")
+
+	//This logic for authenticating user (we usee data from session)
+	//default value for the bool type in the Go programming language is "false"
+	//For authenticated user we will make it true
+	if app.Session.Exists(r.Context(), "user_id") {
+		td.IsAuth = true
+	}
 
 	return td
 }

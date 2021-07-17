@@ -33,7 +33,10 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/generals", handlers.Ripo.Generals)
 	mux.Get("/majors", handlers.Ripo.Majors)
 	mux.Get("/contact", handlers.Ripo.Contact)
+
 	mux.Get("/user/login", handlers.Ripo.Login)
+	mux.Post("/user/login", handlers.Ripo.PostLogin)
+	mux.Get("/user/logout", handlers.Ripo.Logout)
 
 	mux.Get("/search-availability", handlers.Ripo.Availability)
 	mux.Post("/search-availability", handlers.Ripo.PostAvailability)
@@ -44,6 +47,24 @@ func routes(app *config.AppConfig) http.Handler {
 	mux.Get("/make-reservation", handlers.Ripo.Reservation)
 	mux.Post("/make-reservation", handlers.Ripo.PostReservation)
 	mux.Get("/reservation-summary", handlers.Ripo.ReservationSummary)
+
+	//This is protected area - only for Auth users
+	// The "admin" wil lbe cerated automatically to the route
+	mux.Route("/admin", func(mux chi.Router) {
+		//mux.Use(Auth)
+
+		//This is my protected route
+		mux.Get("/dashboard", handlers.Ripo.AdminDashboard)
+		mux.Get("/reservations-new", handlers.Ripo.AdminNewReservations)
+		mux.Get("/reservations-all", handlers.Ripo.AdminAllReservations)
+		mux.Get("/reservations/{src}/{id}", handlers.Ripo.AdminShowReservation)
+		mux.Post("/reservations/{src}/{id}", handlers.Ripo.AdminPostShowReservation)
+		mux.Get("/process-reservation/{src}/{id}", handlers.Ripo.AdminProcessReservation)
+		mux.Get("/delete-reservation/{src}/{id}", handlers.Ripo.AdminDeleteReservation)
+
+		mux.Get("/reservation-calendar", handlers.Ripo.AdminCalendar)
+
+	})
 
 	//------End of my routes block---------------
 
