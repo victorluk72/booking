@@ -29,8 +29,11 @@ var functions = template.FuncMap{
 var app *config.AppConfig
 
 // This is variable to store patch to templates
-// It can be differewnt for Linux
-var pathToTemplates = "../../templates"
+// This is sfor Windows
+//var pathToTemplates = "../../templates"
+
+//This si for Linux
+var pathToTemplates = "./templates"
 
 // NewRenderer sets the config for tempalte package
 func NewRenderer(a *config.AppConfig) {
